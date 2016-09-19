@@ -111,6 +111,7 @@
     <Compile Include="SimplePdfViewerControl.xaml.cs">
       <DependentUpon>SimplePdfViewerControl.xaml</DependentUpon>
     </Compile>
+    <Compile Include="UriExtension.cs" />
     <EmbeddedResource Include="Properties\SimplePdfViewer.rd.xml" />
   </ItemGroup>
   <ItemGroup>

@@ -9,11 +9,12 @@
     d:DesignHeight="300"
     d:DesignWidth="400"
     x:Name="root">
-    <ScrollViewer ZoomMode="Enabled" Background="DarkGray" Grid.Column="1">
+    <ScrollViewer ZoomMode="{x:Bind ZoomMode, Mode=OneWay}" 
+                  Background="{x:Bind Background, Mode=OneWay}">
         <ItemsControl ItemsSource="{x:Bind PdfPages, Mode=OneWay}">
             <ItemsControl.ItemTemplate>
-                <DataTemplate>
-                    <Image Source="{Binding}" Margin="0 2" />
+                <DataTemplate x:DataType="BitmapImage">
+                    <Image Source="{x:Bind }" Margin="0 2" />
                 </DataTemplate>
             </ItemsControl.ItemTemplate>
         </ItemsControl>

@@ -1,23 +1,24 @@
 ﻿using System;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.IO;
 using System.Net.Http;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Windows.Data.Pdf;
 using Windows.Storage;
 using Windows.Storage.Streams;
+using Windows.UI;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
+using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Media.Imaging;
 
 namespace SimplePdfViewer
 {
-    public sealed partial class SimplePdfViewerControl : UserControl
+    public sealed partial class SimplePdfViewerControl : UserControl, INotifyPropertyChanged
     {
-        public SimplePdfViewerControl()
-        {
-            this.InitializeComponent();
-        }
+        public event PropertyChangedEventHandler PropertyChanged;
 
         public Uri Source
         {
@@ -26,14 +27,51 @@ namespace SimplePdfViewer
         }
 
         public static readonly DependencyProperty SourceProperty =
-            DependencyProperty.Register("Source", typeof(Uri), typeof(SimplePdfViewerControl), new PropertyMetadata(null, OnSourceChanged));
+            DependencyProperty.Register("Source", typeof(Uri), typeof(SimplePdfViewerControl),
+                new PropertyMetadata(null, OnSourceChanged));
+
+        public bool IsZoomEnabled
+        {
+            get { return (bool)GetValue(IsZoomEnabledProperty); }
+            set { SetValue(IsZoomEnabledProperty, value); }
+        }
+
+        public static readonly DependencyProperty IsZoomEnabledProperty =
+            DependencyProperty.Register("IsZoomEnabled", typeof(bool), typeof(SimplePdfViewerControl),
+                new PropertyMetadata(true, OnIsZoomEnabledChanged));
+   
+        internal ZoomMode ZoomMode
+        {
+            get { return IsZoomEnabled ? ZoomMode.Enabled : ZoomMode.Disabled; }
+        }
 
         public bool AutoLoad { get; set; }
 
+        internal ObservableCollection<BitmapImage> PdfPages
+        {
+            get;
+            set;
+        } = new ObservableCollection<BitmapImage>();
+
+        public SimplePdfViewerControl()
+        {
+            this.Background = new SolidColorBrush(Colors.DarkGray);
+            this.InitializeComponent();
+        }
+
+        private static void OnIsZoomEnabledChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            ((SimplePdfViewerControl)d).OnIsZoomEnabledChanged();
+        }
+
         private static void OnSourceChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
-
             ((SimplePdfViewerControl)d).OnSourceChanged();
+        }
+
+        private void OnIsZoomEnabledChanged()
+        {
+            OnPropertyChanged(nameof(ZoomMode));
         }
 
         private void OnSourceChanged()
@@ -52,29 +90,19 @@ namespace SimplePdfViewer
             }
             else
             {
-                if(Source.IsFile || !CheckIsHttp(Source))
+                if(Source.IsFile || !Source.IsWebUri())
                 {
                     await LoadFromLocalAsync();
                 }
-                else if(CheckIsHttp(Source))
+                else if(Source.IsWebUri())
                 {
                     await LoadFromRemoteAsync();
                 }
                 else
                 {
-                    //problem
+                    throw new ArgumentException($"Source '{Source.ToString()}' could not be recognized!");
                 }
             }
-        }
-
-        private bool CheckIsHttp(Uri uri)
-        {
-            if (uri != null)
-            {
-                var str = uri.ToString();
-                return str.StartsWith("http://") || str.StartsWith("https://");
-            }
-            return false;
         }
 
         private async Task LoadFromRemoteAsync()
@@ -99,7 +127,7 @@ namespace SimplePdfViewer
             Load(doc);
         }
 
-        async void Load(PdfDocument pdfDoc)
+        private async void Load(PdfDocument pdfDoc)
         {
             PdfPages.Clear();
 
@@ -119,10 +147,9 @@ namespace SimplePdfViewer
             }
         }
 
-        internal ObservableCollection<BitmapImage> PdfPages
+        public void OnPropertyChanged([CallerMemberName]string property = null)
         {
-            get;
-            set;
-        } = new ObservableCollection<BitmapImage>();
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(property));
+        }
     }
 }

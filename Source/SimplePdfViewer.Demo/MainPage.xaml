@@ -17,9 +17,11 @@
             <Button Content="Local PDF" Tapped="{x:Bind OpenLocal}" />
             <Button Content="Remote PDF" Tapped="{x:Bind OpenRemote}" />
         </StackPanel>
-        <controls:SimplePdfViewerControl Grid.Column="1"
+        <controls:SimplePdfViewerControl Grid.Column="1" 
             AutoLoad="True"
             Source="{x:Bind Source, Mode=OneWay}"
-            VerticalAlignment="Stretch" HorizontalAlignment="Stretch"/>
+            VerticalAlignment="Stretch" 
+            HorizontalAlignment="Stretch"
+            IsZoomEnabled="true"/>
     </Grid>
 </Page>
