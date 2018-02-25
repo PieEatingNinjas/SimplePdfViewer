@@ -9,17 +9,15 @@
     mc:Ignorable="d">
 
     <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="250" />
-            <ColumnDefinition Width="*" />
-        </Grid.ColumnDefinitions>
-        <StackPanel>
-            <Button Content="Local PDF" Tapped="{x:Bind OpenLocal}" />
-            <Button Content="Remote PDF" Tapped="{x:Bind OpenRemote}" />
-        </StackPanel>
-        <controls:SimplePdfViewerControl Grid.Column="1" 
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+        <TextBlock Text="{x:Bind File.Path}" />
+        <controls:SimplePdfViewerControl Grid.Row="1" 
             AutoLoad="True"
             Source="{x:Bind Source, Mode=OneWay}"
+            File="{x:Bind File, Mode=OneWay}"
             VerticalAlignment="Stretch" 
             HorizontalAlignment="Stretch"
             IsZoomEnabled="true"/>

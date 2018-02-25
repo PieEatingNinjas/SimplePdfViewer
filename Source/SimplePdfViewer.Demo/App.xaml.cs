@@ -79,6 +79,17 @@ namespace SimplePdfViewer.Demo
             }
         }
 
+        protected override void OnFileActivated(FileActivatedEventArgs args)
+        {
+            var rootFrame = new Frame();
+
+            rootFrame.NavigationFailed += OnNavigationFailed;
+
+            Window.Current.Content = rootFrame;
+            rootFrame.Navigate(typeof(MainPage), args.Files.First());
+            Window.Current.Activate();
+        }
+
         /// <summary>
         /// Invoked when Navigation to a certain page fails
         /// </summary>

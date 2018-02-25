@@ -30,6 +30,16 @@ namespace SimplePdfViewer
             DependencyProperty.Register("Source", typeof(Uri), typeof(SimplePdfViewerControl),
                 new PropertyMetadata(null, OnSourceChanged));
 
+        public StorageFile File
+        {
+            get { return (StorageFile)GetValue(FileProperty); }
+            set { SetValue(FileProperty, value); }
+        }
+
+        public static readonly DependencyProperty FileProperty =
+            DependencyProperty.Register("File", typeof(StorageFile), typeof(SimplePdfViewerControl),
+                new PropertyMetadata(null, OnFileChanged));
+
         public bool IsZoomEnabled
         {
             get { return (bool)GetValue(IsZoomEnabledProperty); }
@@ -69,6 +79,11 @@ namespace SimplePdfViewer
             ((SimplePdfViewerControl)d).OnSourceChanged();
         }
 
+        private static void OnFileChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            ((SimplePdfViewerControl)d).OnFileChanged();
+        }
+
         private void OnIsZoomEnabledChanged()
         {
             OnPropertyChanged(nameof(ZoomMode));
@@ -82,11 +97,24 @@ namespace SimplePdfViewer
             }
         }
 
+        private void OnFileChanged()
+        {
+            if (AutoLoad)
+            {
+                LoadAsync();
+            }
+        }
+
         public async Task LoadAsync()
         {
             if(Source == null)
             {
                 PdfPages.Clear();
+
+                if(File != null)
+                {
+                    await LoadFromFileAsync();
+                }
             }
             else
             {
@@ -102,6 +130,15 @@ namespace SimplePdfViewer
                 {
                     throw new ArgumentException($"Source '{Source.ToString()}' could not be recognized!");
                 }
+            }
+        }
+
+        private async Task LoadFromFileAsync()
+        {
+            if (File != null)
+            {
+                PdfDocument doc = await PdfDocument.LoadFromFileAsync(File);
+                Load(doc);
             }
         }
 
