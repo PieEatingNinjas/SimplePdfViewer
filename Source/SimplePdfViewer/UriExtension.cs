@@ -13,5 +13,15 @@ namespace SimplePdfViewer
             }
             return false;
         }
+
+        public static bool IsApplicationUri(this Uri uri)
+        {
+            if (uri != null)
+            {
+                var str = uri.ToString().ToLower();
+                return str.StartsWith("ms-appx://") || str.StartsWith("ms-appx://");
+            }
+            return false;
+        }
     }
 }

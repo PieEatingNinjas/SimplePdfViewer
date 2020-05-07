@@ -39,7 +39,7 @@ namespace SimplePdfViewer
         public static readonly DependencyProperty IsZoomEnabledProperty =
             DependencyProperty.Register("IsZoomEnabled", typeof(bool), typeof(SimplePdfViewerControl),
                 new PropertyMetadata(true, OnIsZoomEnabledChanged));
-   
+
         internal ZoomMode ZoomMode
         {
             get { return IsZoomEnabled ? ZoomMode.Enabled : ZoomMode.Disabled; }
@@ -90,13 +90,17 @@ namespace SimplePdfViewer
             }
             else
             {
-                if(Source.IsFile || !Source.IsWebUri())
-                {
-                    await LoadFromLocalAsync();
-                }
-                else if(Source.IsWebUri())
+                if (Source.IsWebUri())
                 {
                     await LoadFromRemoteAsync();
+                }
+                else if (Source.IsFile && Source.IsApplicationUri())
+                {
+                    await LoadFromApplicationAsync();
+                }
+                else if (Source.IsFile)
+                {
+                    await LoadFromLocalAsync();
                 }
                 else
                 {
@@ -119,6 +123,15 @@ namespace SimplePdfViewer
         }
 
         private async Task LoadFromLocalAsync()
+        {
+            StorageFile f = await
+                StorageFile.GetFileFromPathAsync(Source.LocalPath);
+            PdfDocument doc = await PdfDocument.LoadFromFileAsync(f);
+
+            Load(doc);
+        }
+
+        private async Task LoadFromApplicationAsync()
         {
             StorageFile f = await
                 StorageFile.GetFileFromApplicationUriAsync(Source);
